@@ -159,6 +159,36 @@ HashTable *hash_table_resize(HashTable *ht)
 
 Answer *get_indices_of_item_weights(int *weights, int length, int limit)
 {
+
+  // If there are less than two items in weights there can't be a matching pair
+  if (length < 2)
+  {
+    return NULL;
+  }
+
+  // if the weights list only has two weights
+  // check if they match the limit, if so return the answer
+  if (length == 2)
+  {
+
+    if ((weights[0] + weights[1]) == limit)
+    {
+      Answer *answer = malloc(sizeof(Answer));
+
+      if (weights[0] < weights[1] || weights[0] == weights[1])
+      {
+        answer->index_1 = 1;
+        answer->index_2 = 0;
+      }
+      else if (weights[0] < weights[1])
+      {
+        answer->index_1 = 0;
+        answer->index_2 = 1;
+      }
+      return answer;
+    }
+  }
+
   HashTable *ht = create_hash_table(16);
 
   /* YOUR CODE HERE */
@@ -169,44 +199,57 @@ Answer *get_indices_of_item_weights(int *weights, int length, int limit)
     if (weights[i] < limit)
     {
 
-      // storing the weight as the key and index in array as the value;
+      // storing the weight as the key and index in array as the value in the hash table;
       hash_table_insert(ht, weights[i], i);
     }
 
-    // printf("Index %d: Value %d\n", i, weights[i]);
+    // printf("Weight: %d\nWeight Index: %d\n", weights[i], i);
   }
 
-  for (int i = 0; i < ht->capacity; i++)
+  for (int i = 0; i < ht->capacity - 1; i++)
   {
+
+    // Only checking indices with a value
     if (ht->storage[i] != NULL)
     {
+      printf("INDEX: %d\n", i);
+      printf("LIMIT: %d\n", limit);
+      printf("KEY: %d\n", ht->storage[i]->key);
 
-      // Finding what values will equal the limit
-      int index_1 = limit - ht->storage[i]->key;
-      int weight_index = hash_table_retrieve(ht, index_1);
-      // printf("Current Key: %d\n", ht->storage[i]->key);
-      // printf("Potential Keys, %d\n", index_1);
+      // Since the weight is being stored as the key in the hash table
+      // We need to find what keys will equal the limit
+      // By subtracting the limit from the current key
+      int weight_value = limit - ht->storage[i]->key;
 
-      if ((ht->storage[i]->key + index_1) == limit && weight_index != -1)
+      // We then pass that key into hash table retrieve
+      // Which will return the value of the key if it exists in the hash table
+      // That value is the index of the weight in the weight array
+      int weight_index = hash_table_retrieve(ht, weight_value);
+
+      // if the key + the weight value equal the limit AND the weight exists
+      // in the hash table, assign the values to the answer struct and return
+
+      if ((ht->storage[i]->key + weight_value) == limit && weight_index != -1)
       {
-        // printf("TRUEEEE\n");
-        printf("LIMIT = %d\n", limit);
-        printf("%d:%d\n", ht->storage[i]->key, weights[weight_index]);
 
+        // printf("LIMIT = %d\n", limit);
+        // printf("WEIGHT INDEX: %d\n", weight_index);
+        // printf("HASH TABLE KEY:VALUE - %d:%d\n", ht->storage[i]->key, ht->storage[i]->value);
         Answer *answer = malloc(sizeof(Answer));
 
         if (ht->storage[i]->key < weights[weight_index])
         {
+          answer->index_1 = weight_index;
+          answer->index_2 = ht->storage[i]->value;
+          ;
+        }
+        else if (ht->storage[i]->key > weights[weight_index])
+        {
           answer->index_1 = ht->storage[i]->value;
           answer->index_2 = weight_index;
         }
-        else
-        {
-          answer->index_1 = weight_index;
-          answer->index_2 = ht->storage[i]->value;
-        }
 
-        printf("ANSWER INDEX_1: %d", answer->index_1);
+        // printf("ANSWER INDEX_1: %d\n", answer->index_1);
 
         return answer;
       }
