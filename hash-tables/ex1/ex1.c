@@ -196,7 +196,7 @@ Answer *get_indices_of_item_weights(int *weights, int length, int limit)
   {
 
     // not storing any weight over the limit
-    if (weights[i] < limit)
+    if (weights[i] <= limit)
     {
 
       // storing the weight as the key and index in array as the value in the hash table;
@@ -212,24 +212,28 @@ Answer *get_indices_of_item_weights(int *weights, int length, int limit)
     // Only checking indices with a value
     if (ht->storage[i] != NULL)
     {
-      printf("INDEX: %d\n", i);
-      printf("LIMIT: %d\n", limit);
-      printf("KEY: %d\n", ht->storage[i]->key);
+      printf("HASH INDEX: %d\n", i);
+
+      printf("Hash KEY/WEIGHT: %d\n", ht->storage[i]->key);
 
       // Since the weight is being stored as the key in the hash table
       // We need to find what keys will equal the limit
       // By subtracting the limit from the current key
       int weight_value = limit - ht->storage[i]->key;
+      printf("WEIGHT VALUE: %d\n", weight_value);
 
       // We then pass that key into hash table retrieve
       // Which will return the value of the key if it exists in the hash table
       // That value is the index of the weight in the weight array
       int weight_index = hash_table_retrieve(ht, weight_value);
+      printf("WEIGHT INDEX: %d\n", weight_index);
+      printf("LIMIT: %d\n", limit);
+      printf("*****\n\n");
 
       // if the key + the weight value equal the limit AND the weight exists
       // in the hash table, assign the values to the answer struct and return
 
-      if ((ht->storage[i]->key + weight_value) == limit && weight_index != -1)
+            if ((ht->storage[i]->key + weight_value) == limit && weight_index != -1)
       {
 
         // printf("LIMIT = %d\n", limit);
